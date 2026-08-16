@@ -43,11 +43,14 @@ export interface WebUpgradeRoute {
 
 /** Gateway config: the listen address. */
 export interface Config {
-  /** Listen host; the two supported values are loopback and all-interfaces. */
-  host: '127.0.0.1' | '0.0.0.0'
+  /** Listen host: loopback, all-interfaces, or a specific IPv4 interface literal. */
+  host: string
   /** Listen port; zero requests an OS-assigned port. */
   port: number
 }
+
+/** Dotted-quad IPv4 shape: a specific interface bind must be an IP literal (hostnames cannot derive a rebinding-safe trust entry). */
+const IPV4_LITERAL = /^(?:\d{1,3}\.){3}\d{1,3}$/
 
 /**
  * The browser HTTP carrier service. Activation listens immediately. Route
@@ -58,7 +61,11 @@ export interface Config {
  */
 export class WebServer extends Service {
   static Config: z<Config> = z.object({
-    host: z.union([z.const('127.0.0.1'), z.const('0.0.0.0')]).required(),
+    host: z.union([
+      z.const('127.0.0.1'),
+      z.const('0.0.0.0'),
+      z.string().pattern(IPV4_LITERAL),
+    ]).required(),
     port: z.natural().max(65535).required(),
   })
 

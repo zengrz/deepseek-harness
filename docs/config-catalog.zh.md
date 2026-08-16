@@ -794,8 +794,8 @@ export interface Config {
 ```ts config-catalog
 /** Gateway config: the listen address. */
 export interface Config {
-  /** Listen host; the two supported values are loopback and all-interfaces. */
-  host: '127.0.0.1' | '0.0.0.0'
+  /** Listen host: loopback, all-interfaces, or a specific IPv4 interface literal. */
+  host: string
   /** Listen port; zero requests an OS-assigned port. */
   port: number
 }
@@ -3150,3 +3150,4 @@ export interface Config {
 - `@deepseek-ai/dsh-typert-generator`（[`packages/typert/generator/src/index.ts`](../packages/typert/generator/src/index.ts)）
 - `@deepseek-ai/dsh-typert-protocol`（[`packages/typert/protocol/src/index.ts`](../packages/typert/protocol/src/index.ts)）
 - `@deepseek-ai/dsh-typert-registry`（[`packages/typert/registry/src/index.ts`](../packages/typert/registry/src/index.ts)）
+- `@deepseek-ai/dsh-uuid`（[`packages/util/uuid/src/index.ts`](../packages/util/uuid/src/index.ts)）

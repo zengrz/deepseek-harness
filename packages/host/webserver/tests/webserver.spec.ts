@@ -85,6 +85,20 @@ async function upgrade(port: number, path: string): Promise<ReturnType<typeof co
   return socket
 }
 
+describe('config schema', () => {
+  it('accepts loopback, all-interfaces, and a specific IPv4 interface literal', () => {
+    expect(HttpServer.Config({ host: '127.0.0.1', port: 0 })).toMatchObject({ host: '127.0.0.1' })
+    expect(HttpServer.Config({ host: '0.0.0.0', port: 0 })).toMatchObject({ host: '0.0.0.0' })
+    expect(HttpServer.Config({ host: '100.88.148.55', port: 0 })).toMatchObject({ host: '100.88.148.55' })
+  })
+
+  it('rejects hostnames and non-literal hosts loudly', () => {
+    expect(() => HttpServer.Config({ host: 'localhost', port: 0 })).toThrow()
+    expect(() => HttpServer.Config({ host: 'app.internal:3080', port: 0 })).toThrow()
+    expect(() => HttpServer.Config({ host: '::1', port: 0 })).toThrow()
+  })
+})
+
 describe('real Loader composition', () => {
   // Real-Loader composition resolves workspace packages through tsx at test
   // time; first resolution after the host/client program split is slow enough

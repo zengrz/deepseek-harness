@@ -30,7 +30,7 @@ const CSS_VIRTUAL_SUFFIX = '.mjs'
  * Everything else under @deepseek-ai/* is either a module-table entry
  * (external) or a leak the purity gate rejects.
  */
-export const INLINE_SAFE = /^@deepseek-ai\/dsh-(host-apiproxy|session|llm|tools|brand)(\/|$)/
+export const INLINE_SAFE = /^@deepseek-ai\/dsh-(host-apiproxy|session|llm|tools|brand|uuid)(\/|$)/
 
 /**
  * Vendored framework libraries: rescoped into @deepseek-ai, so the gate below
@@ -183,7 +183,6 @@ function clientConfig(id: string, entry: string): UserConfig {
     // must carry the TS/TSX mapping consumed by browser profiling tools.
     sourcemap: true,
     clean: false,
-    external: [...CLIENT_EXTERNALS],
     // Browser bundles inline node-idiom deps (zustand/immer read
     // process.env.NODE_ENV; zustand's esm build also probes
     // import.meta.env.MODE, which a CJS output cannot carry — rolldown flags
@@ -199,12 +198,18 @@ function clientConfig(id: string, entry: string): UserConfig {
       'import.meta.env.MODE': JSON.stringify(process.env.NODE_ENV ?? 'production'),
       'import.meta.env': JSON.stringify({ MODE: process.env.NODE_ENV ?? 'production' }),
     },
-    // tsdown auto-externalizes package dependencies; anything NOT in the
-    // loader module table must inline instead (wire/type layers, zod, clsx —
-    // every non-shared dep). A require() the table cannot answer is a
-    // guaranteed runtime throw, so the rule is the table list itself: no
-    // opinion for table entries (external above wins), bundle everything else.
-    noExternal: (id: string) => (CLIENT_EXTERNALS.includes(id) ? undefined : true),
+    // tsdown externalizes every package dependency by default; anything NOT in
+    // the loader module table must inline instead (wire/type layers, zod,
+    // clsx — every non-shared dep). A require() the table cannot answer is a
+    // guaranteed runtime throw, so the rule is the table list itself: table
+    // entries stay external through neverBundle, everything else is forced
+    // bundled by the alwaysBundle callback (a false return, never undefined —
+    // undefined falls through to tsdown's dependency classification, which
+    // treats peers and plain dependencies differently across invocations).
+    deps: {
+      neverBundle: [...CLIENT_EXTERNALS],
+      alwaysBundle: (id: string) => !CLIENT_EXTERNALS.includes(id),
+    },
     plugins: [{
       // Bundle purity gate (build-time mirror of the module-edge rules):
       // platform seed entries stay external, inline-safe wire layers inline,

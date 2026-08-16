@@ -31,8 +31,8 @@ Match order is fixed: exact table first, then longest matching prefix, then the 
 ```ts type-equiv
 /** Gateway config: the listen address. */
 interface Config {
-  /** Listen host; the two supported values are loopback and all-interfaces. */
-  host: '127.0.0.1' | '0.0.0.0'
+  /** Listen host: loopback, all-interfaces, or a specific IPv4 interface literal. */
+  host: string
   /** Listen port; zero requests an OS-assigned port. */
   port: number
 }
@@ -104,5 +104,5 @@ tapIndex(transform: (html: string) => string): () => void
 applyIndexTaps(html: string): string
 ```
 
-Source: [`packages/host/webserver/src/index.ts:59`](../../packages/host/webserver/src/index.ts)
+Source: [`packages/host/webserver/src/index.ts:62`](../../packages/host/webserver/src/index.ts)
 <!-- END GENERATED cordis-surface -->
