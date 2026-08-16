@@ -344,6 +344,52 @@ describe('web e2e: settings modal and General preferences', () => {
     expect(tripwire.pageErrors).toEqual([])
   }, 90_000)
 
+  it('flips the Matrix theme on and off through its switch without touching the durable preference', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-settings-matrix'))
+    await page.getByRole('button', { name: '设置', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: '设置' })
+    await dialog.waitFor({ timeout: 10_000 })
+    const toggle = dialog.getByRole('switch')
+    expect(await toggle.getAttribute('aria-checked')).toBe('false')
+    await toggle.click()
+    await expect.poll(() => toggle.getAttribute('aria-checked'), { timeout: 5_000 }).toBe('true')
+    // The resolved theme is matrix: the dark base palette plus the green-on-black
+    // alias layer applied as inline body tokens. The base background is the
+    // translucent layer over the backdrop, so the rain reads through at
+    // reduced strength instead of painting over content.
+    expect(await page.evaluate(() => document.body.hasAttribute('data-ds-dark-theme'))).toBe(true)
+    expect(await page.evaluate(() => document.body.style.getPropertyValue('--dsw-alias-bg-base'))).toBe('rgba(0, 0, 0, 0.75)')
+    expect(await page.evaluate(() => document.body.style.getPropertyValue('--dsw-alias-brand-primary'))).toBe('rgb(0, 255, 65)')
+    // The digital-rain backdrop mounts its decorative canvas (behind the
+    // columns) plus the veil stacked above it.
+    await expect.poll(() => page.locator('[class*="frame"] canvas').count(), { timeout: 5_000 }).toBe(1)
+    // The backdrop layer is the frame's first static child, so it paints
+    // below every column's content: the rain is a background, never over text.
+    expect(await page.evaluate(() => {
+      const frame = document.querySelector('[class*="frame"]')
+      return frame?.firstElementChild?.hasAttribute('data-shell-backdrop') ?? false
+    })).toBe(true)
+    expect(await page.evaluate(() => {
+      const backdrop = document.querySelector('[data-shell-backdrop]')
+      const canvas = backdrop?.querySelector('canvas') ?? null
+      if (canvas === null) return false
+      // The veil stacks directly above the canvas inside the backdrop entry.
+      const veil = canvas.nextElementSibling
+      return veil instanceof HTMLDivElement && veil.getAttribute('aria-hidden') === 'true'
+    })).toBe(true)
+    // Third-party theme ids stay process-local: the durable settings document
+    // keeps the built-in preference this plugin replaced.
+    const durableSettings = await readFile(join(scaffold.harnessHome, 'settings.yaml'), 'utf8')
+    expect(durableSettings).not.toContain('matrix')
+    expect(durableSettings).toMatch(/ui-theme:\n\s+preference: light/)
+    await toggle.click()
+    await expect.poll(() => toggle.getAttribute('aria-checked'), { timeout: 5_000 }).toBe('false')
+    await expect.poll(() => page.locator('[class*="frame"] canvas').count(), { timeout: 5_000 }).toBe(0)
+    expect(await page.evaluate(() => document.body.hasAttribute('data-ds-dark-theme'))).toBe(false)
+    await page.keyboard.press('Escape')
+    expect(tripwire.pageErrors).toEqual([])
+  }, 60_000)
+
   it('persists the busy-state Enter behavior across reload and a distinct port', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-settings-enter-behavior'))
     await page.getByRole('button', { name: '设置', exact: true }).click()

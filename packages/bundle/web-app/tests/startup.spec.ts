@@ -131,9 +131,26 @@ describe('web command-line provider', () => {
 
   it('rejects the intentionally unsupported all-interfaces host before the consumer activates', async () => {
     const { values, observed } = await bootProvider(['--host', '0.0.0.0'])
-    expect(observed.out).toContain('--host 0.0.0.0 is intentionally not supported yet for safety: it would expose remote code execution to the network; use 127.0.0.1 instead')
+    expect(observed.out).toContain('--host 0.0.0.0 is intentionally not supported for safety: it would expose remote code execution to the network; use a specific interface address instead')
     expect(values).toBeUndefined()
     expect(observed.readerConfig).toBeUndefined()
     expect(observed.exits).toEqual([1])
+  })
+
+  it('accepts a specific IPv4 interface bind and publishes it to the consumer', async () => {
+    const { values, observed } = await bootProvider(['--host', '100.88.148.55'])
+    expect(values).toEqual({ host: '100.88.148.55', trustedHosts: [] })
+    expect(observed.readerConfig).toEqual({ host: '100.88.148.55', port: 3080, trustedHosts: [] })
+    expect(observed.exits).toEqual([])
+  })
+
+  it('rejects a non-IP-literal host before the consumer activates', async () => {
+    for (const host of ['localhost', 'app.internal', '::1', 'http://x']) {
+      const { values, observed } = await bootProvider(['--host', host])
+      expect(observed.out).toContain(`--host must be 127.0.0.1 or a specific IPv4 interface address, got ${JSON.stringify(host)}`)
+      expect(values).toBeUndefined()
+      expect(observed.readerConfig).toBeUndefined()
+      expect(observed.exits).toEqual([1])
+    }
   })
 })

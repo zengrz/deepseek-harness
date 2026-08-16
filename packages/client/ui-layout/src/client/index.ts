@@ -81,6 +81,21 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      * `id` is added beside the shipped entries instead of replacing them.
      */
     'shell.overlay': { kind: 'list'; scope: 'root' }
+    /**
+     * Frame-wide backdrop layer, BELOW every column (the columns paint over
+     * it) and above the frame's own background. Deliberately generic and
+     * unowned by any feature: ambient background entries (an animated
+     * backdrop, a watermark) belong here, and entries order among themselves.
+     * The layer itself is click-through and never occludes the app: entries
+     * paint behind the columns, never over them.
+     *
+     * Whether an occupant is visible depends on the active theme: the frame
+     * and column surfaces paint their palette over the backdrop, so an
+     * occupant reads through only where those surfaces are translucent or
+     * transparent — the occupant sits in front of the frame background,
+     * never behind it.
+     */
+    'shell.backdrop': { kind: 'list'; scope: 'root' }
   }
 }
 
@@ -124,6 +139,7 @@ export function apply(ctx: ClientContext): void {
         'conversation': { kind: 'single', scope: 'session-maybe' },
         'details': { kind: 'single', scope: 'session' },
         'shell.overlay': { kind: 'list', scope: 'root' },
+        'shell.backdrop': { kind: 'list', scope: 'root' },
       },
       // Exclusive store: the factory itself — the framework instantiates per
       // entry and delivers useStore/actions to AppFrame as standard props.

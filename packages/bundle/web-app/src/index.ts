@@ -72,12 +72,19 @@ const LOOPBACK_HOST = '127.0.0.1'
 /** The webserver schema's all-interfaces bind literal. */
 const ALL_INTERFACES_HOST = '0.0.0.0'
 
+/** Whether a bind host lies inside the IPv4 loopback range (127.0.0.0/8). */
+function isLoopbackIpv4(host: string): boolean {
+  return host === LOOPBACK_HOST || host.startsWith('127.')
+}
+
 /**
  * Resolve one LAN-trust snapshot from the active server bind.
  *
  * Derived entries are port-less IP literals: DNS rebinding needs an
  * attacker-controlled name, while an IP-literal Host is safe on any port and
- * an OS-assigned port is unknowable before bind.
+ * an OS-assigned port is unknowable before bind. A specific interface bind
+ * derives that literal itself; an all-interfaces bind derives every
+ * non-internal IPv4 address on the machine.
  * @param bindHost - the active webserver bind host.
  * @param extra - explicit `--trusted-host` values, in argument order.
  * @returns the LAN display addresses and invocation-derived fence authorities.
@@ -87,7 +94,7 @@ export function resolveLanTrust(bindHost: string, extra: readonly string[]): Web
     ? Object.values(networkInterfaces()).flat()
       .filter((iface): iface is NonNullable<typeof iface> => iface !== undefined && iface.family === 'IPv4' && !iface.internal)
       .map(iface => iface.address)
-    : []
+    : isLoopbackIpv4(bindHost) ? [] : [bindHost]
   return { lanAddresses, trustedHosts: [...lanAddresses, ...extra] }
 }
 

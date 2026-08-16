@@ -31,4 +31,15 @@ describe('resolveLanTrust', () => {
     expect(resolveLanTrust('127.0.0.1', ['lab.internal']))
       .toEqual({ lanAddresses: [], trustedHosts: ['lab.internal'] })
   })
+
+  it('derives the bound literal for a specific interface bind — trust and display share it', () => {
+    expect(resolveLanTrust('100.88.148.55', []))
+      .toEqual({ lanAddresses: ['100.88.148.55'], trustedHosts: ['100.88.148.55'] })
+    expect(resolveLanTrust('100.88.148.55', ['harness.internal:3080']))
+      .toEqual({ lanAddresses: ['100.88.148.55'], trustedHosts: ['100.88.148.55', 'harness.internal:3080'] })
+  })
+
+  it('derives nothing for any loopback-range bind', () => {
+    expect(resolveLanTrust('127.0.0.2', [])).toEqual({ lanAddresses: [], trustedHosts: [] })
+  })
 })
