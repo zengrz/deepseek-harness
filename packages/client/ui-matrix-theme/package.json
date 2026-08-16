@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-matrix-theme",
   "description": "Matrix movie aesthetic theme plugin: the selectable matrix theme (green-on-black alias-token overrides on the dark base palette), a digital-rain ambient overlay, and its settings toggle row",
-  "version": "0.1.0-rc.5",
+  "version": "0.1.1",
   "publishConfig": {
     "access": "public"
   },

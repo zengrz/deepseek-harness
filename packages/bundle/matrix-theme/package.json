@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-matrix-theme",
   "description": "The Matrix theme as an installable profile bundle: one patch layer inserting the dsh-client-ui-matrix-theme browser row over any browser-surface profile that does not register it",
-  "version": "0.1.0-rc.5",
+  "version": "0.1.1",
   "publishConfig": {
     "access": "public"
   },
