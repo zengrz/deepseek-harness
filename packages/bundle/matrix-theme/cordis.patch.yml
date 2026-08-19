@@ -1,0 +1,17 @@
+# The dsh-matrix-theme bundle patch: one insert adding the Matrix theme
+# browser row to a browser-surface profile. The dsh-web-app bundle does not
+# register the theme, so this bundle is the theme's install path
+# (dsh plugin --profile <name> add @deepseek-ai/dsh-matrix-theme).
+#
+# The insert form appends; it does not dedupe. A profile whose layers
+# already register `ui-matrix-theme` fails the load with `duplicate loader
+# entry id: ui-matrix-theme`, so do not add the bundle twice or pair it with
+# a custom roster that registers the row itself.
+#
+# The row is a `dsh.client` roster entry the browser roster scanner turns into
+# window.__DSH_BOOT__; the plugin package is this bundle's dependency, so the
+# profile's node resolution finds it for the browser registry.
+
+- insert:
+    - id: ui-matrix-theme
+      name: '@deepseek-ai/dsh-client-ui-matrix-theme'

@@ -5,6 +5,10 @@
   height: 100%;
   overflow: hidden;
   background: var(--dsw-alias-bg-base);
+  /* The frame is a stacking context, so the backdrop layer's negative
+     z-index stays scoped: the backdrop paints above the frame background but
+     below every column's content (static or positioned). */
+  isolation: isolate;
   /* Collapse/expand animates the tracks on the deepsuite sider curve
      (--ds-ease-in-out / --ds-transition-duration-slow, ui-theme base.css). */
   transition: grid-template-columns var(--ds-transition-duration-slow) var(--ds-ease-in-out);
@@ -22,7 +26,23 @@
   }
 }
 
+/* The backdrop is a STATIC grid item spanning the whole frame, first in DOM
+   order. Its negative z-index is scoped by the frame's isolation: entries may
+   anchor their own positioned children (z-index auto) against the frame, and
+   they still paint below every column's content — DOM order alone cannot
+   guarantee that, because positioned children paint after static column
+   backgrounds. Entries stay click-through via pointer-events. */
+.backdropLayer {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
 .sidebarCol {
+  grid-column: 1;
+  grid-row: 1;
   min-width: 0;
   overflow: hidden;
   background: var(--dsw-specific-sidebar-fill);
@@ -30,6 +50,8 @@
 }
 
 .centerCol {
+  grid-column: 2;
+  grid-row: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -37,6 +59,8 @@
 }
 
 .detailsCol {
+  grid-column: 3;
+  grid-row: 1;
   min-width: 0;
   overflow: hidden;
   border-left: 1px solid var(--dsw-alias-border-l2);

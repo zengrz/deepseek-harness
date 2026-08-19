@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-08-15-matrix-theme-third-party-theme-pattern.md
+2026-08-15-matrix-theme-third-party-theme-pattern.md: 2781464003b2c6f0244f8e216b8e2691639fcd6c
+2026-08-15-matrix-theme-third-party-theme-pattern.zh.md: 8962497300a8295aad4734b12dc79bd265eb8d2e
